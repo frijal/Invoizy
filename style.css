@@ -1,0 +1,1332 @@
+/* ═══════════════════════════════════════════════════════════════
+   INVOIZY — Swiss · Apple · Industrial Design System
+   Phase 4: Interactions (Drag Logo, Toggles)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Tokens ─────────────────────────────────────────────────── */
+:root {
+  /* Typography */
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --fs-xs: 11px;
+  --fs-sm: 13px;
+  --fs-base: 15px;
+  --fs-md: 17px;
+  --fs-lg: 22px;
+  --fs-xl: 32px;
+  --fs-xxl: 40px;
+
+  /* Color — Monochrome + Accent (Apple-inspired) */
+  --c-bg: #F5F5F7;
+  --c-surface: #FFFFFF;
+  --c-border: #D2D2D7;
+  --c-border-light: #E8E8ED;
+  --c-text: #1D1D1F;
+  --c-text-sec: #86868B;
+  --c-text-ter: #AEAEB2;
+  --c-accent: #0071E3;
+  --c-accent-hover: #0077ED;
+  --c-accent-light: rgba(0, 113, 227, 0.06);
+  --c-danger: #FF3B30;
+  --c-danger-hover: rgba(255, 59, 48, 0.1);
+  --c-success: #30D158;
+  --c-warning: #FF9F0A;
+  --c-paid: #30D158;
+  --c-overdue: #FF3B30;
+  --c-draft: #86868B;
+  --c-sent: #0071E3;
+
+  /* Spatial */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.08), 0 2px 10px rgba(0, 0, 0, 0.04);
+
+  /* Transitions */
+  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --dur: 0.2s;
+
+  /* Template-specific (overridden by template classes) */
+  --invoice-accent: #0071E3;
+  --invoice-header-bg: transparent;
+  --invoice-header-color: var(--c-text);
+  --invoice-radius: var(--radius-lg);
+}
+
+/* ── Reset ──────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: var(--fs-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--c-bg);
+  color: var(--c-text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ── Toolbar ────────────────────────────────────────────────── */
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--c-border-light);
+  gap: 12px;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.toolbar-icon {
+  color: var(--c-accent);
+}
+
+.toolbar-title {
+  font-size: var(--fs-base);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--c-text);
+}
+
+.toolbar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--c-border);
+  margin: 0 4px;
+}
+
+/* ── Template Selector ──────────────────────────────────────── */
+.template-selector {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: var(--radius-md);
+  padding: 3px;
+}
+
+.template-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  font-family: var(--font);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--c-text-sec);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+  white-space: nowrap;
+}
+
+.template-btn:hover {
+  color: var(--c-text);
+}
+
+.template-btn.active {
+  background: var(--c-surface);
+  color: var(--c-text);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── View Options (Checkboxes) ──────────────────────────────── */
+.view-options {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.view-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--c-text-sec);
+  cursor: pointer;
+  user-select: none;
+}
+
+.view-option input {
+  accent-color: var(--c-accent);
+  width: 14px;
+  height: 14px;
+}
+
+.view-option:hover {
+  color: var(--c-text);
+}
+
+/* ── Currency Select ────────────────────────────────────────── */
+.currency-select {
+  font-family: var(--font);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--c-text);
+  background: transparent;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  outline: none;
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+}
+
+.currency-select:hover {
+  border-color: var(--c-text-sec);
+}
+
+.currency-select:focus {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 2px var(--c-accent-light);
+}
+
+/* ── Buttons ────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--c-text-sec);
+}
+
+.btn-ghost:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--c-text);
+}
+
+.btn-ghost:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--c-accent);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--c-accent-hover);
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+/* ── Invoice Wrapper ────────────────────────────────────────── */
+.invoice-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 40px 24px 80px;
+}
+
+.invoice {
+  width: 100%;
+  max-width: 800px;
+  background: var(--c-surface);
+  border-radius: var(--invoice-radius);
+  box-shadow: var(--shadow-lg);
+  padding: 0;
+  animation: fadeUp 0.5s var(--ease) both;
+  overflow: hidden;
+  position: relative;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Invoice Band (Bold template only) ──────────────────────── */
+.invoice-band {
+  display: none;
+  /* Shown only in bold template */
+  padding: 40px 56px 32px;
+  background: var(--invoice-accent);
+  color: #fff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.band-title {
+  font-size: var(--fs-xxl);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  outline: none;
+  line-height: 1;
+}
+
+/* ── Invoice Header ─────────────────────────────────────────── */
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 48px 56px 0;
+  position: relative;
+  /* For dragging boundaries if needed, though we use transform */
+}
+
+/* Logo */
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+  /* Allow dragging */
+  z-index: 10;
+  position: relative;
+}
+
+.logo-area {
+  width: 140px;
+  height: 80px;
+  border: 2px dashed var(--c-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border 0.2s, background 0.2s;
+  overflow: hidden;
+  position: relative;
+  background: #fff;
+  /* Ensure it covers anything behind if dragged */
+}
+
+.logo-area:hover,
+.logo-area:focus-visible {
+  border-color: var(--c-accent);
+  background: var(--c-accent-light);
+}
+
+.logo-area.has-logo {
+  border-style: solid;
+  border-color: var(--c-border-light);
+  cursor: grab;
+  /* Indicates draggable */
+}
+
+.logo-area.has-logo:active {
+  cursor: grabbing;
+}
+
+.logo-area.has-logo:hover {
+  border-color: var(--c-accent);
+}
+
+.logo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--c-text-ter);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.logo-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: none;
+  padding: 6px;
+  pointer-events: none;
+}
+
+/* Logo Resize */
+.logo-resize {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.logo-resize input[type="range"] {
+  width: 100px;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--c-border-light);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.logo-resize input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--c-accent);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  cursor: grab;
+}
+
+.logo-hint {
+  font-size: 10px;
+  color: var(--c-text-ter);
+  text-align: center;
+  margin-top: -4px;
+  pointer-events: none;
+}
+
+/* Meta */
+.invoice-meta {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: none;
+  /* Allow dragging logo "over" meta if needed, but inputs need pointer-events */
+}
+
+.invoice-meta>* {
+  pointer-events: auto;
+  /* Re-enable for children */
+}
+
+.invoice-title-inline {
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--c-text);
+  line-height: 1.1;
+  margin-bottom: 12px;
+  outline: none;
+  transition: color var(--dur) var(--ease);
+}
+
+.invoice-title-inline:focus {
+  color: var(--c-accent);
+}
+
+.meta-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  font-size: var(--fs-sm);
+}
+
+.meta-row label {
+  color: var(--c-text-sec);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+}
+
+.meta-row .editable,
+.meta-row input[type="date"] {
+  font-family: var(--font);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--c-text);
+  border: none;
+  background: transparent;
+  text-align: right;
+  outline: none;
+  padding: 3px 0;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur) var(--ease);
+}
+
+.meta-row .editable:hover,
+.meta-row input[type="date"]:hover {
+  border-bottom-color: var(--c-border);
+}
+
+.meta-row .editable:focus,
+.meta-row input[type="date"]:focus {
+  border-bottom-color: var(--c-accent);
+}
+
+/* Status Select */
+.status-select {
+  font-family: var(--font);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: none;
+  background: var(--c-accent-light);
+  color: var(--c-accent);
+  padding: 4px 8px;
+  border-radius: 100px;
+  outline: none;
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: center;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.status-select:focus {
+  box-shadow: 0 0 0 2px var(--c-accent-light);
+}
+
+.status-select[data-status="paid"] {
+  background: rgba(48, 209, 88, 0.1);
+  color: var(--c-paid);
+}
+
+.status-select[data-status="overdue"] {
+  background: rgba(255, 59, 48, 0.1);
+  color: var(--c-overdue);
+}
+
+.status-select[data-status="draft"] {
+  background: rgba(134, 134, 139, 0.1);
+  color: var(--c-draft);
+}
+
+.status-select[data-status="sent"] {
+  background: var(--c-accent-light);
+  color: var(--c-sent);
+}
+
+/* ── Parties ────────────────────────────────────────────────── */
+.invoice-parties {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  padding: 40px 56px;
+  margin: 0;
+}
+
+.party-label,
+.section-label {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--c-text-sec);
+  margin-bottom: 8px;
+}
+
+.party-details {
+  font-size: var(--fs-sm);
+  line-height: 1.7;
+  color: var(--c-text);
+  white-space: pre-line;
+  outline: none;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: all var(--dur) var(--ease);
+  min-height: 80px;
+}
+
+.party-details:hover {
+  background: rgba(0, 0, 0, 0.015);
+  border-color: var(--c-border-light);
+}
+
+.party-details:focus {
+  background: var(--c-accent-light);
+  border-color: var(--c-accent);
+}
+
+/* ── Items Table ────────────────────────────────────────────── */
+.invoice-items {
+  padding: 0 56px;
+  margin-bottom: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead th {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--c-text-sec);
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 2px solid var(--c-text);
+}
+
+thead th.col-qty,
+thead th.col-price,
+thead th.col-total {
+  text-align: right;
+}
+
+tbody tr {
+  transition: background var(--dur) var(--ease);
+}
+
+tbody tr:hover {
+  background: rgba(0, 0, 0, 0.015);
+}
+
+tbody td {
+  padding: 10px 12px;
+  font-size: var(--fs-sm);
+  border-bottom: 1px solid var(--c-border-light);
+  vertical-align: middle;
+}
+
+.col-desc {
+  width: 45%;
+}
+
+.col-qty {
+  width: 12%;
+  text-align: right;
+}
+
+.col-price {
+  width: 20%;
+  text-align: right;
+}
+
+.col-total {
+  width: 18%;
+  text-align: right;
+  font-weight: 600;
+}
+
+.col-action {
+  width: 5%;
+  text-align: center;
+}
+
+/* Item inputs */
+.item-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: var(--fs-sm);
+  color: var(--c-text);
+  outline: none;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: all var(--dur) var(--ease);
+}
+
+.item-input:hover {
+  border-color: var(--c-border-light);
+}
+
+.item-input:focus {
+  border-color: var(--c-accent);
+  background: var(--c-accent-light);
+}
+
+.item-input.align-right {
+  text-align: right;
+}
+
+.item-total {
+  font-weight: 600;
+  color: var(--c-text);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Remove button */
+.btn-remove {
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  color: var(--c-text-ter);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--dur) var(--ease);
+  opacity: 0;
+}
+
+tbody tr:hover .btn-remove {
+  opacity: 1;
+}
+
+.btn-remove:hover {
+  background: var(--c-danger-hover);
+  color: var(--c-danger);
+}
+
+/* Add item */
+.btn-add-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  margin-top: 12px;
+  border: 1px dashed var(--c-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  font-family: var(--font);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--c-text-sec);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+  width: 100%;
+  justify-content: center;
+}
+
+.btn-add-item:hover {
+  border-color: var(--c-accent);
+  color: var(--c-accent);
+  background: var(--c-accent-light);
+}
+
+/* ── Summary ────────────────────────────────────────────────── */
+.invoice-summary {
+  display: flex;
+  justify-content: flex-end;
+  padding: 24px 56px 0;
+}
+
+.summary-spacer {
+  flex: 1;
+}
+
+.summary-table {
+  width: 260px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  font-size: var(--fs-sm);
+  color: var(--c-text-sec);
+  border-bottom: 1px solid var(--c-border-light);
+  font-variant-numeric: tabular-nums;
+  transition: opacity 0.2s, height 0.2s, padding 0.2s;
+}
+
+.summary-row.hidden {
+  display: none;
+}
+
+.summary-row span:last-child {
+  font-weight: 500;
+  color: var(--c-text);
+}
+
+.summary-total {
+  border-bottom: none;
+  border-top: 2px solid var(--c-text);
+  margin-top: 4px;
+  padding-top: 12px;
+  font-size: var(--fs-md);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.summary-total span:first-child {
+  font-weight: 700;
+  color: var(--c-text);
+}
+
+.summary-total span:last-child {
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  color: var(--c-text);
+  letter-spacing: -0.02em;
+}
+
+.editable-inline {
+  outline: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur) var(--ease);
+  min-width: 16px;
+  display: inline-block;
+  text-align: center;
+}
+
+.editable-inline:hover {
+  border-bottom-color: var(--c-border);
+}
+
+.editable-inline:focus {
+  border-bottom-color: var(--c-accent);
+}
+
+/* ── Bank Details ───────────────────────────────────────────── */
+.invoice-bank {
+  padding: 32px 56px 0;
+  border-top: 1px solid var(--c-border-light);
+  margin: 32px 56px 0;
+  padding-left: 0;
+  padding-right: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.bank-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 32px;
+}
+
+.bank-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bank-field label {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--c-text-ter);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.bank-field .editable {
+  font-size: var(--fs-sm);
+  color: var(--c-text);
+  outline: none;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: all var(--dur) var(--ease);
+}
+
+.bank-field .editable:hover {
+  background: rgba(0, 0, 0, 0.015);
+  border-color: var(--c-border-light);
+}
+
+.bank-field .editable:focus {
+  background: var(--c-accent-light);
+  border-color: var(--c-accent);
+}
+
+/* ── Notes ──────────────────────────────────────────────────── */
+.invoice-notes {
+  padding: 32px 56px 0;
+}
+
+.notes-content {
+  font-size: var(--fs-sm);
+  color: var(--c-text-sec);
+  line-height: 1.6;
+  outline: none;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: all var(--dur) var(--ease);
+  min-height: 40px;
+}
+
+.notes-content:hover {
+  background: rgba(0, 0, 0, 0.015);
+  border-color: var(--c-border-light);
+}
+
+.notes-content:focus {
+  background: var(--c-accent-light);
+  border-color: var(--c-accent);
+}
+
+/* ── Footer ─────────────────────────────────────────────────── */
+.invoice-footer {
+  padding: 40px 56px 48px;
+  text-align: center;
+}
+
+.footer-thankyou {
+  font-size: var(--fs-sm);
+  color: var(--c-text-ter);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  outline: none;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: all var(--dur) var(--ease);
+  display: inline-block;
+}
+
+.footer-thankyou:hover {
+  border-color: var(--c-border-light);
+}
+
+.footer-thankyou:focus {
+  border-color: var(--c-accent);
+  background: var(--c-accent-light);
+}
+
+/* ── Toast ──────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--c-text);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 100px;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.35s var(--ease);
+  z-index: 1000;
+  white-space: nowrap;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Contenteditable global ─────────────────────────────────── */
+[contenteditable="true"] {
+  cursor: text;
+}
+
+[contenteditable="true"]::selection {
+  background: rgba(0, 113, 227, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TEMPLATE: MINIMAL (default)
+   ═══════════════════════════════════════════════════════════════ */
+.invoice--minimal {
+  --invoice-accent: #0071E3;
+}
+
+.invoice--minimal .invoice-band {
+  display: none;
+}
+
+.invoice--minimal .invoice-title-inline {
+  display: block;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TEMPLATE: CLASSIC
+   ═══════════════════════════════════════════════════════════════ */
+.invoice--classic {
+  --invoice-accent: #2C3E50;
+  border-radius: var(--radius-sm);
+}
+
+.invoice--classic .invoice-band {
+  display: none;
+}
+
+.invoice--classic .invoice-title-inline {
+  display: block;
+  color: #2C3E50;
+}
+
+.invoice--classic .invoice-header {
+  background: #F8F9FA;
+  border-bottom: 2px solid #2C3E50;
+  padding-bottom: 32px;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.invoice--classic .invoice-parties {
+  border-bottom: 1px solid var(--c-border-light);
+  padding-bottom: 32px;
+}
+
+.invoice--classic thead th {
+  border-bottom-color: #2C3E50;
+  color: #2C3E50;
+}
+
+.invoice--classic .summary-total {
+  border-top-color: #2C3E50;
+}
+
+.invoice--classic .party-label,
+.invoice--classic .section-label {
+  color: #2C3E50;
+}
+
+.invoice--classic .status-select {
+  background: rgba(44, 62, 80, 0.08);
+  color: #2C3E50;
+}
+
+.invoice--classic .btn-add-item:hover {
+  border-color: #2C3E50;
+  color: #2C3E50;
+  background: rgba(44, 62, 80, 0.04);
+}
+
+.invoice--classic .item-input:focus {
+  border-color: #2C3E50;
+  background: rgba(44, 62, 80, 0.04);
+}
+
+.invoice--classic .party-details:focus,
+.invoice--classic .notes-content:focus,
+.invoice--classic .bank-field .editable:focus,
+.invoice--classic .footer-thankyou:focus {
+  border-color: #2C3E50;
+  background: rgba(44, 62, 80, 0.04);
+}
+
+.invoice--classic .logo-area:hover,
+.invoice--classic .logo-area:focus-visible {
+  border-color: #2C3E50;
+  background: rgba(44, 62, 80, 0.04);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TEMPLATE: BOLD
+   ═══════════════════════════════════════════════════════════════ */
+.invoice--bold {
+  --invoice-accent: #1D1D1F;
+  border-radius: var(--radius-md);
+}
+
+.invoice--bold .invoice-band {
+  display: block;
+  background: #1D1D1F;
+}
+
+.invoice--bold .invoice-title-inline {
+  display: none;
+  /* Title is in the band */
+}
+
+.invoice--bold thead th {
+  background: #F5F5F7;
+  border-bottom: none;
+  padding: 12px;
+  border-radius: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.invoice--bold thead th:first-child {
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.invoice--bold thead th:last-child {
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.invoice--bold .summary-total {
+  background: #1D1D1F;
+  color: #fff;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: none;
+  margin-top: 8px;
+}
+
+.invoice--bold .summary-total span:first-child {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.invoice--bold .summary-total span:last-child {
+  color: #fff;
+}
+
+.invoice--bold .footer-thankyou {
+  font-weight: 700;
+  font-size: var(--fs-base);
+  color: var(--c-text);
+}
+
+.invoice--bold .invoice-bank {
+  background: #F8F9FA;
+  padding: 24px;
+  border-radius: var(--radius-md);
+  margin: 32px 56px 0;
+  border: none;
+}
+
+.invoice--bold .logo-area:hover,
+.invoice--bold .logo-area:focus-visible {
+  border-color: #1D1D1F;
+  background: rgba(29, 29, 31, 0.04);
+}
+
+.invoice--bold .btn-add-item:hover {
+  border-color: #1D1D1F;
+  color: #1D1D1F;
+  background: rgba(29, 29, 31, 0.04);
+}
+
+.invoice--bold .item-input:focus {
+  border-color: #1D1D1F;
+  background: rgba(29, 29, 31, 0.04);
+}
+
+.invoice--bold .party-details:focus,
+.invoice--bold .notes-content:focus,
+.invoice--bold .bank-field .editable:focus,
+.invoice--bold .footer-thankyou:focus {
+  border-color: #1D1D1F;
+  background: rgba(29, 29, 31, 0.04);
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 680px) {
+
+  .invoice-header,
+  .invoice-parties,
+  .invoice-items,
+  .invoice-summary,
+  .invoice-notes,
+  .invoice-footer {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .invoice-bank {
+    margin-left: 24px;
+    margin-right: 24px;
+  }
+
+  .invoice-header {
+    flex-direction: column-reverse;
+    gap: 20px;
+  }
+
+  .invoice-meta {
+    text-align: left;
+  }
+
+  .meta-row {
+    justify-content: flex-start;
+  }
+
+  .meta-row .editable,
+  .meta-row input[type="date"] {
+    text-align: left;
+  }
+
+  .invoice-parties {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .bank-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    padding: 8px 12px;
+    flex-wrap: wrap;
+    /* allow wrapping on mobile */
+  }
+
+  .toolbar-center {
+    order: 3;
+    width: 100%;
+    margin-top: 8px;
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+
+  .toolbar-actions .btn span {
+    display: none;
+  }
+
+  .template-btn span {
+    display: none;
+  }
+
+  .invoice-wrapper {
+    padding: 16px 8px 60px;
+  }
+
+  .invoice-band {
+    padding: 32px 24px 24px;
+  }
+
+  .invoice--bold .invoice-bank {
+    margin-left: 24px;
+    margin-right: 24px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRINT STYLES
+   ═══════════════════════════════════════════════════════════════ */
+@media print {
+
+  /* Force background colors */
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: white;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  /* Ensure logo position (via transform) is respected */
+  .logo-container {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .invoice-wrapper {
+    padding: 0;
+    justify-content: flex-start;
+  }
+
+  .invoice {
+    box-shadow: none;
+    border-radius: 0;
+    max-width: 100%;
+    margin: 0;
+    overflow: visible;
+  }
+
+  /* Ensure page breaks don't cut content awkwardly */
+  .invoice-header,
+  .invoice-parties,
+  .invoice-items,
+  .invoice-summary,
+  .invoice-bank,
+  .invoice-notes,
+  .invoice-footer {
+    page-break-inside: avoid;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  /* Reset input styles for print */
+  .item-input {
+    border: none !important;
+    padding: 0;
+  }
+
+  /* Remove any interactive hints */
+  .party-details,
+  .notes-content,
+  .bank-field .editable,
+  .footer-thankyou {
+    border: none !important;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .logo-area {
+    border: none !important;
+    background: transparent !important;
+    /* clear background for print */
+  }
+
+  /* Bold template print specifics */
+  .invoice--bold .invoice-band {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .invoice--bold .summary-total {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .invoice--bold thead th {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Classic template print specifics */
+  .invoice--classic .invoice-header {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+}
