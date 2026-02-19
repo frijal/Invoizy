@@ -1,4 +1,4 @@
-# 📄 Invoizy — Minimalist Swiss Design Invoice Generator
+# 📄 Invoizy — Minimalist Local Invoice Generator
 
 **Invoizy** is a professional-grade invoice generator built on the Minimalist Swiss design philosophy. It provides a fast, efficient, and aesthetic invoicing experience directly in the browser with zero backend dependencies.
 
@@ -7,6 +7,7 @@
 ---
 
 ## 📸 Preview
+<img width="1919" height="1079" alt="Screenshot 2026-02-19 141319" src="https://github.com/user-attachments/assets/71103b3a-e96f-4972-8168-9975c2074ea0" />
 
 
 ---
@@ -33,5 +34,6 @@
 1. **Clone** this repository / *Clone* repositori ini.
 2. Open **`index.html`** in any modern web browser / Buka **`index.html`** di browser modern.
 3. Start creating / Mulai buat invoice Anda.
+
 
 ---
